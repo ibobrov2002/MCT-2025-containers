@@ -82,7 +82,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Start services (dev mode)
+      - name: Start services
         run: docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d
 
       - name: Wait for web to be ready
@@ -97,42 +97,7 @@ jobs:
             sleep 1
           done
 
-      - name: Test dev mode visits endpoint
-        run: |
-          response=$(curl -s http://localhost:8000/visits)
-          if [[ "$response" != "-1" ]]; then
-            echo "Expected '-1' in dev mode, got: $response"
-            exit 1
-          fi
-
-      - name: Show logs on failure
-        if: failure()
-        run: docker compose logs
-
-  test-dev:
-    runs-on: ubuntu-latest
-    name: Test Development Mode
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Start services (dev mode)
-        run: docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d
-
-      - name: Wait for web to be ready
-        run: |
-          timeout=60
-          while ! curl -f http://localhost:8000 >/dev/null 2>&1; do
-            ((timeout--))
-            if [ $timeout -eq 0 ]; then
-              echo "Web service failed to start"
-              exit 1
-            fi
-            sleep 1
-          done
-
-      - name: Test dev mode visits endpoint
+      - name: Test dev mode visits endpoint(4 dop)
         run: |
           response=$(curl -s http://localhost:8000/visits)
           if [[ "$response" != "-1" ]]; then
